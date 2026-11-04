@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sistem Administrasi Tata Usaha – SMK Baitul Hikmah</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
+</head>
+<body>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside id="sb">
+    <div class="brand">
+      <div class="logo-img" id="sideLogo">BH</div>
+      <div>
+        <b id="sideSchoolName">SMK BAITUL HIKMAH</b>
+        <small>Administrasi Tata Usaha</small>
+      </div>
+    </div>
+
+    <nav id="nav">
+      <a data-go="dashboard" class="on"><span>🏠</span> Dashboard</a>
+      <a data-go="students"><span>🎓</span> Data Induk Siswa</a>
+      <a data-go="teachers"><span>👤</span> Data Guru &amp; Tendik</a>
+      <a data-go="letters"><span>✉️</span> Persuratan &amp; Arsip</a>
+      <a data-go="kesiswaan"><span>👥</span> Kesiswaan &amp; Mutasi</a>
+      <a data-go="academic"><span>📖</span> Nilai &amp; Leger</a>
+      <a data-go="inventory"><span>📦</span> Inventaris Barang</a>
+      <a data-go="reports"><span>📊</span> Laporan &amp; Rekap</a>
+      <a data-go="settings"><span>⚙️</span> Pengaturan Sistem</a>
+    </nav>
+
+    <div class="aside-user">
+      <div class="av" id="userAv">A</div>
+      <div style="flex:1;min-width:0;overflow:hidden">
+        <b id="userNameDisplay" style="display:block;white-space:nowrap;text-overflow:ellipsis;overflow:hidden">Admin TU</b>
+        <small id="userRoleDisplay" style="color:#d1fae5">Administrator</small>
+      </div>
+      <button class="btn sm d" id="btnLogout" title="Keluar dari sistem" style="padding:3px 6px">🚪</button>
+    </div>
+  </aside>
+
+  <!-- MAIN WRAPPER -->
+  <main>
+    <!-- HEADER -->
+    <header>
+      <button class="ic" id="burger" aria-label="Menu">☰</button>
+      <div class="crumb" id="crumb">🏠 Dashboard</div>
+      
+      <div class="search">
+        <input id="q" placeholder="Cari siswa, guru, surat, atau dokumen…">
+      </div>
+
+      <!-- IP Local Server Pill -->
+      <button class="lan-pill" id="btnLanInfo" title="Klik untuk panduan akses via HP / Wi-Fi">
+        <span>📶</span> <span class="txt">Akses HP</span>
+      </button>
+
+      <!-- Selector Tahun Ajaran -->
+      <select id="tasel" class="tasel" title="Pilih Tahun Ajaran"></select>
+
+      <div class="top-user">
+        <div class="av" style="width:32px;height:32px;font-size:12px" id="topAv">A</div>
+        <span id="topUserName">Admin TU</span>
+      </div>
+    </header>
+
+    <!-- BANNER TAHUN AJARAN ARSIP (NON-AKTIF) -->
+    <div id="tabn" style="display:none">
+      <span>⏪ Anda sedang melihat tahun ajaran arsip <b id="tab1"></b> (Bukan tahun aktif: <span id="tab2"></span>). Data tetap tersimpan rapi.</span>
+      <button class="btn sm" id="tab3" style="background:#fff;color:var(--ort)">Kembali ke Tahun Aktif</button>
+    </div>
+
+    <!-- 1. DASHBOARD -->
+    <div class="wrap module-view" id="view-dashboard">
+      <div class="top">
+        <div>
+          <h1 id="dashSchoolTitle">Dashboard Tata Usaha</h1>
+          <div class="sub">SMK Baitul Hikmah &bull; Tahun Ajaran <span class="ta-label">2026/2027</span></div>
+        </div>
+        <div class="date-box">📅 <span id="dt"></span> &nbsp;|&nbsp; 🕒 <span id="tm"></span></div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid stats">
+        <div class="card stat">
+          <div class="ico">👥</div>
+          <div>
+            <small>Total Siswa Aktif</small>
+            <strong id="statTotStudents">0</strong>
+            <span class="pill">↑ Terdata</span>
+          </div>
+        </div>
+        <div class="card stat">
+          <div class="ico" style="background:var(--bll);color:var(--bl)">👤</div>
+          <div>
+            <small>Guru &amp; Tendik</small>
+            <strong id="statTotTeachers">0</strong>
+            <span class="pill">↑ Terdata</span>
+          </div>
+        </div>
+        <div class="card stat">
+          <div class="ico">✉️</div>
+          <div>
+            <small>Surat Masuk</small>
+            <strong id="statTotLettersIn">0</strong>
+            <span class="pill">↑ Tercatat</span>
+          </div>
+        </div>
+        <div class="card stat">
+          <div class="ico" style="background:var(--or);color:var(--ort)">⚠️</div>
+          <div>
+            <small>Surat Perlu Tindak Lanjut</small>
+            <strong id="statLettersAction">0</strong>
+            <span class="pill w">Perlu Disposisi</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: Donut + Bar Chart + Agenda -->
+      <div class="grid row2">
+        <div class="card">
+          <h3>Ringkasan Gender &amp; Jurusan</h3>
+          <div class="donutw">
+            <div class="donut" id="dashDonut">
+              <div class="donut-inner">
+                <b id="donutTot">0</b>
+                <span>Siswa</span>
+              </div>
+            </div>
+            <div class="leg">
+              <div><span class="dot" style="background:var(--bl)"></span>Laki-laki<br><b id="legLk">0</b> <span id="legLkp">(0%)</span></div>
+              <div><span class="dot" style="background:var(--pk)"></span>Perempuan<br><b id="legPr">0</b> <span id="legPrp">(0%)</span></div>
+              <div><span class="dot" style="background:#0e7a46"></span>DKV: <b id="legDkv">0</b></div>
+              <div><span class="dot" style="background:#e08a00"></span>Bisnis Digital: <b id="legBd">0</b></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Jumlah Siswa per Kelas</h3>
+          <div id="classChartContainer" style="min-height:200px"></div>
+        </div>
+
+        <div class="card">
+          <h3>📅 Agenda Sekolah</h3>
+          <div id="agendaList">
+            <div class="ag"><div class="dt-badge">20<small>Okt</small></div><div><b>Rapat Koordinasi TU &amp; Guru</b><p>08.00 - 10.00 &bull; Ruang Aula</p></div></div>
+            <div class="ag"><div class="dt-badge">24<small>Okt</small></div><div><b>Batas Entri Nilai Tengah Semester</b><p>Seluruh Wali Kelas &amp; Mapel</p></div></div>
+            <div class="ag"><div class="dt-badge">28<small>Okt</small></div><div><b>Upacara Hari Sumpah Pemuda</b><p>07.00 - 08.00 &bull; Lapangan</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3: Quick Access + Activity Logs -->
+      <div class="grid row3">
+        <div class="card">
+          <h3>⚡ Akses Cepat</h3>
+          <div class="quick">
+            <button onclick="App.openStudentModal()"><span>👤➕</span>Tambah Siswa</button>
+            <button onclick="App.openLetterModal('keluar')"><span>📤</span>Buat Surat</button>
+            <button onclick="App.openLetterModal('masuk')"><span>✉️</span>Surat Masuk</button>
+            <button onclick="App.openTeacherModal()"><span>🧑‍🏫</span>Input Guru</button>
+            <button onclick="App.navigate('reports')"><span>🖨️</span>Cetak Laporan</button>
+            <button onclick="App.navigate('academic')"><span>📖</span>Leger Nilai</button>
+            <button onclick="App.navigate('settings', 'ta')"><span>🗓️</span>Kenaikan Kelas</button>
+            <button onclick="App.navigate('settings', 'bak')"><span>💾</span>Cadangan Data</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>🕒 Aktivitas Terbaru Sistem</h3>
+          <div class="tblw">
+            <table>
+              <thead>
+                <tr><th>Waktu</th><th>Aktivitas</th><th>Pengguna</th><th>Status</th></tr>
+              </thead>
+              <tbody id="dashActivityTbody">
+                <tr><td colspan="4" style="text-align:center;color:var(--mut)">Memuat aktivitas...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. DATA INDUK SISWA -->
+    <div class="wrap module-view" id="view-students" style="display:none">
+      <div class="top">
+        <div>
+          <h1>Data Induk Siswa</h1>
+          <div class="sub">Total siswa terdata: <span id="studentCountLabel">0</span> anak &bull; Tahun Ajaran: <span class="ta-label">2026/2027</span></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" onclick="App.downloadStudentTemplate()">📄 Unduh Template</button>
+          <button class="btn" onclick="document.getElementById('fileImportStudent').click()">📥 Impor Excel</button>
+          <input type="file" id="fileImportStudent" accept=".xlsx,.xls,.csv" style="display:none" onchange="App.handleImportStudent(this)">
+          <button class="btn" onclick="App.exportStudentsExcel()">📤 Ekspor Excel</button>
+          <button class="btn" onclick="App.checkDuplicateNis()">🔍 Cek NIS Ganda</button>
+          <button class="btn p" onclick="App.openStudentModal()">＋ Tambah Siswa</button>
+        </div>
+      </div>
+
+      <div class="tools">
+        <select id="filterStudentStatus" onchange="App.loadStudents(1)">
+          <option value="all">Semua Status</option>
+          <option value="Aktif" selected>Siswa Aktif</option>
+          <option value="Lulus">Lulus</option>
+          <option value="Pindah">Pindah</option>
+          <option value="Keluar">Keluar</option>
+        </select>
+        <select id="filterStudentClass" onchange="App.loadStudents(1)">
+          <option value="">Semua Kelas</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="tblw">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:40px">No</th>
+                <th>NIS / NISN</th>
+                <th>Nama Lengkap</th>
+                <th>JK</th>
+                <th>Kelas</th>
+                <th>Tempat, Tanggal Lahir</th>
+                <th>Status</th>
+                <th style="text-align:center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="studentTbody">
+              <tr><td colspan="8" style="text-align:center">Memuat data siswa...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination -->
+        <div id="studentPagination" style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:13px;color:var(--mut)"></div>
+      </div>
+    </div>
+
+    <!-- 3. DATA GURU & TENDIK -->
+    <div class="wrap module-view" id="view-teachers" style="display:none">
+      <div class="top">
+        <div>
+          <h1>Data Guru &amp; Tenaga Kependidikan</h1>
+          <div class="sub">Total Tenaga Pendidik &amp; Kependidikan: <span id="teacherCountLabel">0</span> orang</div>
+        </div>
+        <button class="btn p" onclick="App.openTeacherModal()">＋ Tambah Guru / Tendik</button>
+      </div>
+
+      <div class="tools">
+        <select id="filterTeacherType" onchange="App.loadTeachers()">
+          <option value="all">Semua Jenis</option>
+          <option value="Guru">Guru</option>
+          <option value="Tendik">Tenaga Kependidikan</option>
+        </select>
+        <select id="filterTeacherStatus" onchange="App.loadTeachers()">
+          <option value="all">Semua Status</option>
+          <option value="PNS">PNS</option>
+          <option value="GTY">GTY</option>
+          <option value="Honorer">Honorer</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <div class="tblw">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:40px">No</th>
+                <th>NIP / NUPTK</th>
+                <th>Nama Lengkap</th>
+                <th>Jenis</th>
+                <th>Mapel / Bagian</th>
+                <th>Wali Kelas</th>
+                <th>Status</th>
+                <th style="text-align:center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="teacherTbody">
+              <tr><td colspan="8" style="text-align:center">Memuat data pegawai...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. PERSURATAN & ARSIP -->
+    <div class="wrap module-view" id="view-letters" style="display:none">
+      <div class="mtabs">
+        <button class="mtb on" onclick="App.switchLetterTab('letters')">✉️ Persuratan (Masuk &amp; Keluar)</button>
+        <button class="mtb" onclick="App.switchLetterTab('archives')">📁 Arsip Digital Berkas</button>
+      </div>
+
+      <!-- Tab Persuratan -->
+      <div id="subtab-letters">
+        <div class="top">
+          <div>
+            <h1>Persuratan Sekolah</h1>
+            <div class="sub">Pencatatan surat masuk, keluar, dan lembar disposisi Kepala Sekolah</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="App.openLetterModal('keluar')">📤 Buat Surat Keluar</button>
+            <button class="btn p" onclick="App.openLetterModal('masuk')">＋ Catat Surat Masuk</button>
+          </div>
+        </div>
+
+        <div class="tools">
+          <select id="filterLetterType" onchange="App.loadLetters()">
+            <option value="all">Semua Jenis Surat</option>
+            <option value="masuk">Surat Masuk</option>
+            <option value="keluar">Surat Keluar</option>
+          </select>
+          <select id="filterLetterStatus" onchange="App.loadLetters()">
+            <option value="all">Semua Status</option>
+            <option value="Baru">Baru</option>
+            <option value="Perlu Tindak Lanjut">Perlu Tindak Lanjut</option>
+            <option value="Diproses">Diproses</option>
+            <option value="Selesai">Selesai</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="tblw">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:40px">No</th>
+                  <th>Jenis</th>
+                  <th>Nomor Surat</th>
+                  <th>Tanggal</th>
+                  <th>Pengirim / Penerima</th>
+                  <th>Perihal</th>
+                  <th>Status</th>
+                  <th>Disposisi</th>
+                  <th>Lampiran</th>
+                  <th style="text-align:center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="letterTbody">
+                <tr><td colspan="10" style="text-align:center">Memuat data surat...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Arsip Digital -->
+      <div id="subtab-archives" style="display:none">
+        <div class="top">
+          <div>
+            <h1>Arsip Digital Sekolah</h1>
+            <div class="sub">Pengelolaan berkas dan dokumen penting (SK, Perjanjian, Keuangan, dsb.)</div>
+          </div>
+          <button class="btn p" onclick="App.openArchiveModal()">＋ Unggah Arsip Dokumen</button>
+        </div>
+
+        <div class="tools">
+          <select id="filterArchiveCategory" onchange="App.loadArchives()">
+            <option value="all">Semua Kategori</option>
+            <option value="SK / Keputusan">SK / Keputusan</option>
+            <option value="Surat Masuk">Surat Masuk</option>
+            <option value="Surat Keluar">Surat Keluar</option>
+            <option value="Data Siswa">Data Siswa</option>
+            <option value="Keuangan">Keuangan</option>
+            <option value="Akademik">Akademik</option>
+            <option value="Kerja Sama">Kerja Sama</option>
+            <option value="Inventaris">Inventaris</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="tblw">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:40px">No</th>
+                  <th>Judul Dokumen</th>
+                  <th>Kategori</th>
+                  <th>Tanggal</th>
+                  <th>Nama Berkas</th>
+                  <th>Keterangan</th>
+                  <th style="text-align:center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="archiveTbody">
+                <tr><td colspan="7" style="text-align:center">Memuat arsip dokumen...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. KESISWAAN & MUTASI -->
+    <div class="wrap module-view" id="view-kesiswaan" style="display:none">
+      <div class="mtabs">
+        <button class="mtb on" onclick="App.switchKesiswaanTab('records')">🎖️ Prestasi &amp; Pelanggaran</button>
+        <button class="mtb" onclick="App.switchKesiswaanTab('mutations')">🔄 Mutasi Siswa (Masuk/Keluar)</button>
+      </div>
+
+      <!-- Tab Catatan Kesiswaan -->
+      <div id="subtab-records">
+        <div class="top">
+          <div>
+            <h1>Catatan Kesiswaan</h1>
+            <div class="sub">Pencatatan prestasi, pelanggaran, serta izin peserta didik</div>
+          </div>
+          <button class="btn p" onclick="App.openRecordModal()">＋ Tambah Catatan Siswa</button>
+        </div>
+
+        <div class="tools">
+          <select id="filterRecordType" onchange="App.loadKesiswaanRecords()">
+            <option value="all">Semua Jenis</option>
+            <option value="Prestasi">Prestasi</option>
+            <option value="Pelanggaran">Pelanggaran</option>
+            <option value="Izin">Izin</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="tblw">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:40px">No</th>
+                  <th>Nama Siswa</th>
+                  <th>Kelas</th>
+                  <th>Jenis</th>
+                  <th>Tanggal</th>
+                  <th>Judul / Kejadian</th>
+                  <th>Keterangan</th>
+                  <th style="text-align:center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="recordTbody">
+                <tr><td colspan="8" style="text-align:center">Memuat catatan kesiswaan...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Mutasi Siswa -->
+      <div id="subtab-mutations" style="display:none">
+        <div class="top">
+          <div>
+            <h1>Mutasi Siswa</h1>
+            <div class="sub">Pencatatan siswa pindahan masuk &amp; siswa keluar / mengundurkan diri</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="App.openMutationMasukModal()">＋ Mutasi Masuk (Siswa Pindahan)</button>
+            <button class="btn p" onclick="App.openMutationKeluarModal()">－ Mutasi Keluar (Pindah/Keluar)</button>
+          </div>
+        </div>
+
+        <div class="tools">
+          <select id="filterMutationType" onchange="App.loadMutations()">
+            <option value="all">Semua Mutasi</option>
+            <option value="masuk">Mutasi Masuk</option>
+            <option value="keluar">Mutasi Keluar</option>
+          </select>
+          <button class="btn" onclick="App.printMutationReport()">🖨️ Cetak Rekap Mutasi</button>
+        </div>
+
+        <div class="card">
+          <div class="tblw">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:40px">No</th>
+                  <th>Jenis</th>
+                  <th>Tanggal</th>
+                  <th>NIS</th>
+                  <th>Nama Siswa</th>
+                  <th>Kelas</th>
+                  <th>Sekolah Asal / Tujuan</th>
+                  <th>Alasan &amp; No. Surat</th>
+                  <th style="text-align:center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="mutationTbody">
+                <tr><td colspan="9" style="text-align:center">Memuat data mutasi...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. NILAI & LEGER -->
+    <div class="wrap module-view" id="view-academic" style="display:none">
+      <div class="top">
+        <div>
+          <h1>Leger Nilai Akademik Siswa</h1>
+          <div class="sub">Tabel nilai per mata pelajaran, jumlah, dan rata-rata siswa</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" onclick="App.exportLegerExcel()">📤 Ekspor Excel</button>
+          <button class="btn" onclick="document.getElementById('fileImportLeger').click()">📥 Impor Nilai Excel</button>
+          <input type="file" id="fileImportLeger" accept=".xlsx,.xls,.csv" style="display:none" onchange="App.handleImportLeger(this)">
+          <button class="btn p" onclick="App.printLeger()">🖨️ Cetak Leger Kelas</button>
+        </div>
+      </div>
+
+      <div class="tools">
+        <select id="selLegerClass" onchange="App.loadLeger()">
+          <option value="__all">Semua Kelas</option>
+        </select>
+        <select id="selLegerSemester" onchange="App.loadLeger()">
+          <option value="Ganjil">Semester Ganjil</option>
+          <option value="Genap">Semester Genap</option>
+        </select>
+        <span class="sub" style="margin-left:auto" id="legerSummaryText"></span>
+      </div>
+
+      <div class="card">
+        <div class="tblw" id="legerTableWrapper">
+          <p style="text-align:center;padding:20px;color:var(--mut)">Memuat leger nilai siswa...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. INVENTARIS BARANG -->
+    <div class="wrap module-view" id="view-inventory" style="display:none">
+      <div class="top">
+        <div>
+          <h1>Inventaris Barang &amp; Sarana Prasarana</h1>
+          <div class="sub">Pengelolaan sarpras, kondisi barang, dan lokasi penempatan aset</div>
+        </div>
+        <button class="btn p" onclick="App.openInventoryModal()">＋ Tambah Barang Inventaris</button>
+      </div>
+
+      <div class="tools">
+        <select id="filterInvCategory" onchange="App.loadInventory()">
+          <option value="all">Semua Kategori</option>
+          <option value="Elektronik">Elektronik</option>
+          <option value="Furnitur">Furnitur</option>
+          <option value="Alat Praktik">Alat Praktik</option>
+          <option value="Buku">Buku</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+        <select id="filterInvCondition" onchange="App.loadInventory()">
+          <option value="all">Semua Kondisi</option>
+          <option value="Baik">Kondisi Baik</option>
+          <option value="Rusak Ringan">Rusak Ringan</option>
+          <option value="Rusak Berat">Rusak Berat</option>
+        </select>
+      </div>
+
+      <!-- Quick Summary Cards -->
+      <div class="grid stats" style="margin-bottom:16px">
+        <div class="card stat"><div class="ico">📦</div><div><small>Jenis Barang</small><strong id="invTotItems">0</strong></div></div>
+        <div class="card stat"><div class="ico" style="background:var(--gl)">🔢</div><div><small>Total Unit Fisik</small><strong id="invTotUnits">0</strong></div></div>
+        <div class="card stat"><div class="ico" style="background:var(--or)">⚠️</div><div><small>Perlu Perbaikan</small><strong id="invNeedsRepair">0</strong></div></div>
+      </div>
+
+      <div class="card">
+        <div class="tblw">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:40px">No</th>
+                <th>Kode</th>
+                <th>Nama Barang</th>
+                <th>Kategori</th>
+                <th>Lokasi</th>
+                <th>Jumlah</th>
+                <th>Kondisi</th>
+                <th>Catatan</th>
+                <th style="text-align:center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTbody">
+              <tr><td colspan="9" style="text-align:center">Memuat data inventaris...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. LAPORAN & CETAK -->
+    <div class="wrap module-view" id="view-reports" style="display:none">
+      <div class="top no-print">
+        <div>
+          <h1>Laporan Administrasi Sekolah</h1>
+          <div class="sub">Pilih jenis laporan untuk melihat pratinjau, mencetak berkop resmi, atau ekspor ke Excel</div>
+        </div>
+        <div style="display:flex;gap:8px" class="btns">
+          <button class="btn" onclick="App.exportReportExcel()">📊 Ekspor Excel</button>
+          <button class="btn p" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+        </div>
+      </div>
+
+      <div class="tools no-print">
+        <select id="selReportType" onchange="App.loadReportPreview()">
+          <option value="siswa">Rekapitulasi Siswa</option>
+          <option value="guru">Rekapitulasi Guru &amp; Tendik</option>
+          <option value="surat">Rekapitulasi Persuratan</option>
+          <option value="inv">Rekapitulasi Inventaris</option>
+          <option value="kes">Rekapitulasi Catatan Kesiswaan</option>
+          <option value="mutasi">Rekapitulasi Mutasi Siswa</option>
+          <option value="kelas">Daftar Siswa per Kelas</option>
+          <option value="wali">Daftar Wali Kelas</option>
+        </select>
+        <select id="selReportClass" style="display:none" onchange="App.loadReportPreview()">
+          <option value="__all">Semua Kelas</option>
+        </select>
+        <select id="selReportSemester" style="display:none" onchange="App.loadReportPreview()">
+          <option value="Ganjil">Semester Ganjil</option>
+          <option value="Genap">Semester Genap</option>
+        </select>
+      </div>
+
+      <div class="card paper" id="reportPaperPreview" style="background:#fff;color:#000;padding:24px;border:1px solid #ddd">
+        <p style="text-align:center;color:var(--mut)">Memuat pratinjau laporan...</p>
+      </div>
+    </div>
+
+    <!-- 9. PENGATURAN SISTEM -->
+    <div class="wrap module-view" id="view-settings" style="display:none">
+      <div class="mtabs">
+        <button class="mtb on" onclick="App.switchSettingTab('ident')">🏫 Identitas Sekolah &amp; Logo</button>
+        <button class="mtb" onclick="App.switchSettingTab('ta')">🗓️ Tahun Ajaran &amp; Kenaikan Kelas</button>
+        <button class="mtb" onclick="App.switchSettingTab('kls')">🏷️ Daftar Kelas</button>
+        <button class="mtb" onclick="App.switchSettingTab('mpl')">📚 Daftar Mapel</button>
+        <button class="mtb" onclick="App.switchSettingTab('usr')">👥 Pengguna &amp; Akun</button>
+        <button class="mtb" onclick="App.switchSettingTab('bak')">💾 Cadangkan &amp; Pulihkan</button>
+      </div>
+
+      <!-- Tab Identitas Sekolah -->
+      <div id="subtab-ident">
+        <div class="top">
+          <div>
+            <h1>Identitas Sekolah &amp; Kop Resmi</h1>
+            <div class="sub">Data ini otomatis diterapkan pada Kop Surat, Biodata Siswa/Guru, Leger, dan seluruh Laporan</div>
+          </div>
+          <button class="btn p" onclick="App.saveSchoolProfile()">Simpan Identitas</button>
+        </div>
+
+        <div class="grid row3">
+          <div class="card">
+            <h3>Data Lembaga</h3>
+            <div class="form-grid">
+              <div class="full"><label>Nama Sekolah *</label><input id="set_school_name"></div>
+              <div class="full"><label>Naungan Lembaga (Baris Atas Kop)</label><input id="set_foundation"></div>
+              <div class="full"><label>Bidang Keahlian</label><input id="set_field"></div>
+              <div class="full"><label>Alamat Lengkap *</label><input id="set_address"></div>
+              <div><label>Kota / Kabupaten</label><input id="set_city"></div>
+              <div><label>Akreditasi</label><input id="set_accreditation"></div>
+              <div><label>NPSN</label><input id="set_npsn"></div>
+              <div><label>NSS</label><input id="set_nss"></div>
+              <div><label>Telepon</label><input id="set_phone"></div>
+              <div><label>Email Sekolah</label><input id="set_email"></div>
+              <div><label>Website</label><input id="set_website"></div>
+              <div><label>Tata Letak Logo Kop</label>
+                <select id="set_kop_layout" onchange="App.renderKopPreview()">
+                  <option value="kiri">Logo di Kiri</option>
+                  <option value="tengah">Logo di Tengah Atas</option>
+                </select>
+              </div>
+              <div class="full"><label>Nama Kepala Sekolah</label><input id="set_principal_name"></div>
+              <div class="full"><label>NIP Kepala Sekolah</label><input id="set_principal_nip"></div>
+            </div>
+
+            <h3 style="margin-top:20px">Logo Sekolah</h3>
+            <div style="display:flex;gap:16px;align-items:center;margin-top:10px">
+              <div id="setLogoPreview" style="width:72px;height:72px;border:1px dashed var(--bd);border-radius:10px;display:grid;place-items:center;overflow:hidden;background:#fff">
+                <span>Logo</span>
+              </div>
+              <div>
+                <input type="file" id="setLogoFile" accept="image/*" style="font-size:12px">
+                <small class="sub" style="display:block;margin-top:4px">Disarankan PNG berlatar transparan (Maks. 5 MB)</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Pratinjau Kop Surat Resmi</h3>
+            <div id="kopLivePreview" style="background:#fff;color:#000;border:1px solid #ccc;border-radius:8px;padding:20px;margin-bottom:14px"></div>
+            <div class="btns" style="justify-content:flex-start">
+              <button class="btn" onclick="App.printBlankKop()">🖨️ Cetak Kop Saja</button>
+              <button class="btn p" onclick="App.printBlankTemplateSurat()">📄 Template Surat Resmi</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Tahun Ajaran -->
+      <div id="subtab-ta" style="display:none">
+        <div class="top">
+          <div>
+            <h1>Tahun Ajaran &amp; Kenaikan Kelas Otomatis</h1>
+            <div class="sub">Tahun ajaran aktif saat ini: <b class="ta-label">2026/2027</b></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+          <h3>Buat Tahun Ajaran Baru &amp; Transisi Siswa</h3>
+          <p class="sub" style="margin-bottom:14px">Sistem akan otomatis menaikkan jenjang siswa aktif: <b>Kelas X naik ke XI</b>, <b>Kelas XI naik ke XII</b>, dan <b>Kelas XII dinyatakan Lulus</b>. Anda dapat mencentang siswa yang tinggal kelas.</p>
+          
+          <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px">
+              <label style="font-size:12px;font-weight:600">Nama Tahun Ajaran Baru (contoh: 2027/2028)</label>
+              <input id="newYearNameInput" placeholder="2027/2028">
+            </div>
+            <button class="btn p" onclick="App.previewPromotion()">👁️ Pratinjau Kenaikan Kelas</button>
+          </div>
+
+          <!-- Promotion Preview Box -->
+          <div id="promotionPreviewBox" style="display:none;margin-top:16px;border-top:1px dashed var(--bd);padding-top:14px">
+            <h4>Daftar Siswa &bull; Centang jika siswa Tinggal Kelas (Tidak Naik / Tidak Lulus)</h4>
+            <div class="tblw" style="max-height:360px;margin:10px 0">
+              <table>
+                <thead>
+                  <tr><th>No</th><th>NIS</th><th>Nama Siswa</th><th>Kelas Sekarang</th><th>Menjadi</th><th>Tinggal Kelas</th></tr>
+                </thead>
+                <tbody id="promoTbody"></tbody>
+              </table>
+            </div>
+            <div class="btns">
+              <button class="btn" onclick="document.getElementById('promotionPreviewBox').style.display='none'">Batal</button>
+              <button class="btn p" onclick="App.executeNewYear()">Lanjutkan &amp; Terbitkan Tahun Ajaran Baru</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Riwayat Tahun Ajaran</h3>
+          <div class="tblw">
+            <table>
+              <thead>
+                <tr><th>Tahun Ajaran</th><th>Status</th><th>Tanggal Dibuat</th><th>Aksi</th></tr>
+              </thead>
+              <tbody id="academicYearListTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Daftar Kelas -->
+      <div id="subtab-kls" style="display:none">
+        <div class="top">
+          <div>
+            <h1>Daftar Kelas Sekolah</h1>
+            <div class="sub">Daftar ini menjadi pilihan standar di seluruh formulir siswa, leger, dan laporan</div>
+          </div>
+          <button class="btn p" onclick="App.saveClassesList()">Simpan Daftar Kelas</button>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+            <input id="genClassLevels" value="X, XI, XII" style="width:130px" placeholder="Tingkat">
+            <input id="genClassMajors" value="DKV, BD" style="width:130px" placeholder="Jurusan">
+            <input id="genClassCount" type="number" min="1" max="10" value="3" style="width:80px" title="Rombel (3 = A, B, C)">
+            <button class="btn" onclick="App.generateClassesAuto()">⚡ Buat Otomatis</button>
+          </div>
+          <label style="font-size:12px;color:var(--mut)">Satu nama kelas per baris (bebas disunting manual):</label>
+          <textarea id="classesTextarea" rows="12" style="width:100%;padding:10px;font-family:monospace;font-size:13.5px"></textarea>
+          <small class="sub" id="classesCountSummary">0 kelas terdaftar</small>
+        </div>
+      </div>
+
+      <!-- Tab Daftar Mapel -->
+      <div id="subtab-mpl" style="display:none">
+        <div class="top">
+          <div>
+            <h1>Daftar Mata Pelajaran (Mapel)</h1>
+            <div class="sub">Urutan mata pelajaran digunakan pada leger dan rekapitulasi nilai</div>
+          </div>
+          <button class="btn p" onclick="App.saveSubjectsList()">Simpan Daftar Mapel</button>
+        </div>
+
+        <div class="card">
+          <label style="font-size:12px;color:var(--mut)">Satu nama mata pelajaran per baris (berurutan):</label>
+          <textarea id="subjectsTextarea" rows="14" style="width:100%;padding:10px;font-family:monospace;font-size:13.5px"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+            <small class="sub" id="subjectsCountSummary">0 mapel terdaftar</small>
+            <button class="btn sm" onclick="App.resetSubjectsDefault()">Kembalikan ke Default SMK</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Pengguna & Akun -->
+      <div id="subtab-usr" style="display:none">
+        <div class="top">
+          <div>
+            <h1>Manajemen Pengguna &amp; Hak Akses</h1>
+            <div class="sub">Akun login staf TU, Kepala Sekolah, dan Guru</div>
+          </div>
+          <button class="btn p" onclick="App.openUserModal()">＋ Tambah Pengguna Baru</button>
+        </div>
+
+        <div class="card">
+          <div class="tblw">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:40px">No</th>
+                  <th>Nama Lengkap</th>
+                  <th>Username</th>
+                  <th>Peran (Role)</th>
+                  <th>Status</th>
+                  <th>Terakhir Masuk</th>
+                  <th style="text-align:center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="usersTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Cadangkan & Pulihkan -->
+      <div id="subtab-bak" style="display:none">
+        <div class="top">
+          <div>
+            <h1>Cadangkan (Backup) &amp; Pulihkan (Restore)</h1>
+            <div class="sub">Penyimpanan salinan database sekolah secara mandiri dan aman</div>
+          </div>
+        </div>
+
+        <div class="grid row2">
+          <div class="card">
+            <h3>💾 Cadangkan Database</h3>
+            <p class="sub" style="margin-bottom:16px">Mengunduh seluruh isi data (Siswa, Guru, Surat, Inventaris, Nilai, dll.) dalam format berkas <code>.json</code>. Simpan berkas ini di flashdisk atau Google Drive secara berkala.</p>
+            <button class="btn p" onclick="App.downloadBackup()">⬇️ Unduh Berkas Cadangan (.JSON)</button>
+          </div>
+
+          <div class="card">
+            <h3>♻️ Pulihkan Data (Restore)</h3>
+            <p class="sub" style="margin-bottom:14px">Memulihkan data akan mengganti isi tabel saat ini dengan data dari berkas cadangan.</p>
+            <input type="file" id="fileRestoreBackup" accept=".json" style="margin-bottom:10px">
+            <div>
+              <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:400;margin-bottom:12px">
+                <input type="checkbox" id="chkRestoreAuth" checked style="width:auto"> Pulihkan juga akun pengguna &amp; sandi
+              </label>
+            </div>
+            <button class="btn d" onclick="App.executeRestore()">Pulihkan Database Sekarang</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL DIALOGS -->
+  <!-- ======================================================== -->
+
+  <!-- 1. MODAL SISWA (LENGKAP BUKU INDUK STANDAR BAGIAN A - I) -->
+  <div class="modal" id="modalStudent">
+    <div class="box box-lg">
+      <h3 id="modalStudentTitle">Tambah Data Siswa</h3>
+      
+      <div class="mtabs" style="margin-top:10px;flex-wrap:wrap">
+        <button class="mtb on" onclick="App.switchStudentFormTab('ab')">A. Pribadi &amp; B. Tempat Tinggal</button>
+        <button class="mtb" onclick="App.switchStudentFormTab('cd')">C. Kesehatan &amp; D. Pendidikan</button>
+        <button class="mtb" onclick="App.switchStudentFormTab('ef')">E. Orang Tua Kandung &amp; F. Wali</button>
+        <button class="mtb" onclick="App.switchStudentFormTab('ghi')">G. Kegemaran, H. Perkembangan &amp; I. Pasca Lulus</button>
+      </div>
+
+      <input type="hidden" id="s_id">
+
+      <!-- Tab 1: A. Pribadi & B. Tempat Tinggal -->
+      <div id="sform-ab">
+        <h4 style="margin:8px 0;color:var(--g1)">A. KETERANGAN PRIBADI SISWA</h4>
+        <div class="form-grid">
+          <div><label>1. NIS (Nomor Induk Siswa) *</label><input id="s_nis" placeholder="mis. 2026001"></div>
+          <div><label>NISN (10 Digit Angka)</label><input id="s_nisn" placeholder="mis. 0061234567"></div>
+          <div class="full"><label>Nama Lengkap Peserta Didik *</label><input id="s_name" placeholder="Nama lengkap sesuai ijazah SMP/MTs"></div>
+          <div><label>Nama Panggilan</label><input id="s_nickname" placeholder="Nama panggilan sehari-hari"></div>
+          <div><label>2. Jenis Kelamin</label>
+            <select id="s_gender">
+              <option value="L">Laki-laki</option>
+              <option value="P">Perempuan</option>
+            </select>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <label style="margin:0">Kelas Sekarang *</label>
+              <a href="javascript:void(0)" onclick="App.promptAddNewClass()" style="font-size:11px;font-weight:600;color:var(--g1);text-decoration:underline" title="Klik untuk menambah kelas baru jika belum ada di daftar">+ Tambah Kelas</a>
+            </div>
+            <select id="s_class_name" onchange="if(this.value==='__add_new__') App.promptAddNewClass()"></select>
+          </div>
+          <div><label>Kompetensi Keahlian</label><input id="s_accepted_major" placeholder="Desain Komunikasi Visual / Bisnis Digital"></div>
+          <div><label>3. Tempat Lahir</label><input id="s_birthplace" placeholder="Kota lahir"></div>
+          <div><label>Tanggal Lahir</label><input id="s_birthdate" type="date"></div>
+          <div><label>4. Agama</label>
+            <select id="s_religion">
+              <option value="Islam">Islam</option>
+              <option value="Kristen">Kristen</option>
+              <option value="Katolik">Katolik</option>
+              <option value="Hindu">Hindu</option>
+              <option value="Buddha">Buddha</option>
+              <option value="Konghucu">Konghucu</option>
+            </select>
+          </div>
+          <div><label>5. Kewarganegaraan</label><input id="s_nationality" value="WNI"></div>
+          <div><label>6. Anak Keberapa</label><input id="s_order_in_family" type="number" min="1" value="1"></div>
+          <div><label>7. Jumlah Saudara Kandung</label><input id="s_siblings_count" type="number" min="0" value="0"></div>
+          <div><label>8. Jumlah Saudara Tiri</label><input id="s_step_siblings_count" type="number" min="0" value="0"></div>
+          <div><label>9. Jumlah Saudara Angkat</label><input id="s_adopted_siblings_count" type="number" min="0" value="0"></div>
+          <div><label>10. Status Yatim / Piatu</label>
+            <select id="s_orphan_status">
+              <option value="Bukan yatim/piatu">Bukan yatim/piatu</option>
+              <option value="Yatim">Yatim</option>
+              <option value="Piatu">Piatu</option>
+              <option value="Yatim piatu">Yatim piatu</option>
+            </select>
+          </div>
+          <div><label>11. Bahasa Sehari-hari di Rumah</label><input id="s_daily_language" value="Bahasa Indonesia"></div>
+          <div><label>Status Keaktifan</label>
+            <select id="s_status">
+              <option value="Aktif">Aktif</option>
+              <option value="Lulus">Lulus</option>
+              <option value="Pindah">Pindah</option>
+              <option value="Keluar">Keluar</option>
+            </select>
+          </div>
+        </div>
+
+        <h4 style="margin:18px 0 8px;color:var(--g1)">B. KETERANGAN TEMPAT TINGGAL</h4>
+        <div class="form-grid">
+          <div class="full"><label>12. Alamat Rumah Lengkap</label><textarea id="s_address" rows="2" placeholder="Alamat lengkap RT/RW, Dusun, Desa, Kecamatan"></textarea></div>
+          <div><label>13. Nomor Telepon / HP Siswa</label><input id="s_phone" placeholder="08xxxxxxxxxx"></div>
+          <div><label>14. Tinggal Bersama</label>
+            <select id="s_living_with">
+              <option value="Orang Tua">Orang Tua</option>
+              <option value="Saudara">Saudara</option>
+              <option value="Asrama">Asrama</option>
+              <option value="Kost">Kost</option>
+            </select>
+          </div>
+          <div><label>15. Jarak Tempat Tinggal ke Sekolah</label><input id="s_distance_to_school" placeholder="mis. 2 km"></div>
+        </div>
+      </div>
+
+      <!-- Tab 2: C. Kesehatan & D. Pendidikan -->
+      <div id="sform-cd" style="display:none">
+        <h4 style="margin:8px 0;color:var(--g1)">C. KETERANGAN KESEHATAN</h4>
+        <div class="form-grid">
+          <div><label>16. Golongan Darah</label><input id="s_blood_type" placeholder="A / B / AB / O / -"></div>
+          <div><label>17. Penyakit yang Pernah Diderita</label><input id="s_medical_history" placeholder="mis. Asma, Tifus, atau -"></div>
+          <div><label>18. Kelainan Jasmani</label><input id="s_physical_disability" placeholder="- jika tidak ada"></div>
+          <div><label>19. Tinggi dan Berat Badan (Saat diterima)</label><input id="s_height_weight" placeholder="mis. 160 cm / 50 kg"></div>
+        </div>
+
+        <h4 style="margin:18px 0 8px;color:var(--g1)">D. KETERANGAN PENDIDIKAN SEBELUMNYA &amp; PENERIMAAN</h4>
+        <div class="form-grid">
+          <div class="full"><label>20. a. Tamatan Dari (SMP / MTs)</label><input id="s_previous_school" placeholder="mis. SMP Negeri 1 Tempurejo"></div>
+          <div><label>20. b. Tanggal &amp; Nomor Ijazah</label><input id="s_certificate_number" placeholder="mis. 2026 / DN-05/D-SMP/101"></div>
+          <div><label>20. c. Tanggal &amp; Nomor STL / SKHUN</label><input id="s_skhun_number" placeholder="Nomor SKHUN"></div>
+          <div><label>20. d. Lama Belajar</label><input id="s_study_duration" value="3 tahun"></div>
+          <div><label>21. a. Pindahan dari Sekolah (Jika ada)</label><input id="s_transfer_from" placeholder="- jika bukan pindahan"></div>
+          <div class="full"><label>21. b. Alasan Pindah</label><input id="s_transfer_reason" placeholder="Alasan pindah"></div>
+          <div><label>22. a. Diterima di Kelas</label><input id="s_accepted_class" placeholder="mis. XA DKV"></div>
+          <div><label>22. b. Bidang Keahlian</label><input id="s_accepted_field" placeholder="mis. Seni dan Ekonomi Kreatif / Bisnis"></div>
+          <div><label>22. c. Program Keahlian</label><input id="s_accepted_program" placeholder="mis. Desain Komunikasi Visual / Bisnis Digital"></div>
+          <div><label>22. d. Konsentrasi Keahlian</label><input id="s_accepted_major_d" placeholder="mis. Desain Komunikasi Visual"></div>
+          <div><label>22. e. Tanggal Diterima di Sekolah Ini</label><input id="s_accepted_date" type="date"></div>
+        </div>
+      </div>
+
+      <!-- Tab 3: E. Orang Tua Kandung & F. Wali -->
+      <div id="sform-ef" style="display:none">
+        <h4 style="margin:8px 0;color:var(--g1)">E. KETERANGAN TENTANG ORANG TUA KANDUNG</h4>
+        
+        <!-- Data Ayah -->
+        <div style="background:var(--bg);padding:12px;border-radius:10px;margin-bottom:12px">
+          <b style="color:var(--tx)">Data Ayah Kandung:</b>
+          <div class="form-grid" style="margin-top:6px">
+            <div><label>23. Nama Ayah</label><input id="s_father_name" placeholder="Nama lengkap ayah"></div>
+            <div><label>24. Tempat, Tanggal Lahir Ayah</label><input id="s_father_birth" placeholder="mis. Jember, 1975"></div>
+            <div><label>25. Agama Ayah</label><input id="s_father_religion" value="Islam"></div>
+            <div><label>26. Kewarganegaraan Ayah</label><input id="s_father_nationality" value="WNI"></div>
+            <div><label>27. Ijazah Terakhir Ayah</label><input id="s_father_education" placeholder="SMA / S1 / SMP / SD"></div>
+            <div><label>28. Pekerjaan Ayah</label><input id="s_father_job" placeholder="Petani / Wiraswasta / PNS / Buruh"></div>
+            <div><label>29. Penghasilan per Bulan Ayah</label><input id="s_father_income" placeholder="mis. Rp 3.000.000"></div>
+            <div><label>30. Alamat Rumah / No. HP Ayah</label><input id="s_father_address_phone" placeholder="Alamat / No. HP Ayah"></div>
+            <div><label>31. Status Ayah</label>
+              <select id="s_father_is_alive">
+                <option value="Masih hidup">Masih hidup</option>
+                <option value="Meninggal dunia">Meninggal dunia</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Ibu -->
+        <div style="background:var(--bg);padding:12px;border-radius:10px;margin-bottom:12px">
+          <b style="color:var(--tx)">Data Ibu Kandung:</b>
+          <div class="form-grid" style="margin-top:6px">
+            <div><label>23. Nama Ibu</label><input id="s_mother_name" placeholder="Nama lengkap ibu"></div>
+            <div><label>24. Tempat, Tanggal Lahir Ibu</label><input id="s_mother_birth" placeholder="mis. Jember, 1980"></div>
+            <div><label>25. Agama Ibu</label><input id="s_mother_religion" value="Islam"></div>
+            <div><label>26. Kewarganegaraan Ibu</label><input id="s_mother_nationality" value="WNI"></div>
+            <div><label>27. Ijazah Terakhir Ibu</label><input id="s_mother_education" placeholder="SMA / S1 / SMP / SD"></div>
+            <div><label>28. Pekerjaan Ibu</label><input id="s_mother_job" placeholder="Ibu Rumah Tangga / Pedagang"></div>
+            <div><label>29. Penghasilan per Bulan Ibu</label><input id="s_mother_income" placeholder="mis. Rp 1.500.000 atau -"></div>
+            <div><label>30. Alamat Rumah / No. HP Ibu</label><input id="s_mother_address_phone" placeholder="Alamat / No. HP Ibu"></div>
+            <div><label>31. Status Ibu</label>
+              <select id="s_mother_is_alive">
+                <option value="Masih hidup">Masih hidup</option>
+                <option value="Meninggal dunia">Meninggal dunia</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <h4 style="margin:18px 0 8px;color:var(--g1)">F. KETERANGAN TENTANG WALI (Bila Ada)</h4>
+        <div class="form-grid">
+          <div><label>32. Nama Wali</label><input id="s_guardian_name" placeholder="Kosongkan bila tinggal dengan orang tua"></div>
+          <div><label>33. Tempat, Tanggal Lahir Wali</label><input id="s_guardian_birth"></div>
+          <div><label>34. Agama Wali</label><input id="s_guardian_religion" value="Islam"></div>
+          <div><label>35. Kewarganegaraan Wali</label><input id="s_guardian_nationality" value="WNI"></div>
+          <div><label>36. Pekerjaan Wali</label><input id="s_guardian_job"></div>
+          <div class="full"><label>37. Alamat Rumah / No. HP Wali</label><input id="s_guardian_address_phone"></div>
+        </div>
+      </div>
+
+      <!-- Tab 4: G. Kegemaran, H. Perkembangan, & I. Pasca Lulus -->
+      <div id="sform-ghi" style="display:none">
+        <h4 style="margin:8px 0;color:var(--g1)">G. KEGEMARAN SISWA</h4>
+        <div class="form-grid">
+          <div><label>38. Kesenian</label><input id="s_hobby_art" placeholder="mis. Menggambar, Musik, Seni Desain"></div>
+          <div><label>39. Olah Raga</label><input id="s_hobby_sport" placeholder="mis. Futsal, Voli, Badminton"></div>
+          <div><label>40. Kemasyarakatan / Organisasi</label><input id="s_hobby_organization" placeholder="mis. Pramuka, OSIS, PMR"></div>
+          <div><label>41. Lain-lain</label><input id="s_hobby_other" placeholder="Hobi lainnya"></div>
+        </div>
+
+        <h4 style="margin:18px 0 8px;color:var(--g1)">H. KETERANGAN PERKEMBANGAN SISWA</h4>
+        <div class="form-grid">
+          <div><label>42. Menerima Beasiswa 1 (Tahun / Dari)</label><input id="s_scholarship_1" placeholder="mis. 2026 / PIP Kemdikbud"></div>
+          <div><label>Beasiswa 2</label><input id="s_scholarship_2"></div>
+          <div><label>Beasiswa 3</label><input id="s_scholarship_3"></div>
+          <div><label>43. a. Tanggal Meninggalkan Sekolah</label><input id="s_leave_date" type="date"></div>
+          <div class="full"><label>43. b. Alasan Meninggalkan Sekolah</label><input id="s_leave_reason" placeholder="mis. Tamat Belajar / Pindah Sekolah"></div>
+          <div><label>44. a. Akhir Pendidikan: Tamat Belajar (Tahun)</label><input id="s_graduation_year" placeholder="mis. 2027"></div>
+          <div><label>44. b. STTB / Ijazah SMK Nomor</label><input id="s_sttb_number" placeholder="Nomor Ijazah Kelulusan"></div>
+        </div>
+
+        <h4 style="margin:18px 0 8px;color:var(--g1)">I. KETERANGAN SETELAH SELESAI PENDIDIKAN</h4>
+        <div class="form-grid">
+          <div class="full"><label>45. Melanjutkan Pendidikan di</label><input id="s_continue_to" placeholder="Nama Universitas / Politeknik"></div>
+          <div><label>46. a. Tanggal Mulai Bekerja</label><input id="s_work_start_date" type="date"></div>
+          <div><label>46. b. Nama Perusahaan / Lembaga</label><input id="s_work_company" placeholder="Nama PT / Studio / Tempat Kerja"></div>
+          <div><label>46. c. Penghasilan Pertama</label><input id="s_work_income" placeholder="mis. Rp 3.500.000"></div>
+        </div>
+      </div>
+
+      <div class="btns">
+        <button class="btn" onclick="App.closeModals()">Batal</button>
+        <button class="btn p" onclick="App.saveStudent()">Simpan Data Siswa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. MODAL GURU / TENDIK -->
+  <div class="modal" id="modalTeacher">
+    <div class="box">
+      <h3 id="modalTeacherTitle">Tambah Guru / Tendik</h3>
+      <input type="hidden" id="t_id">
+      <div><label>NIP / NUPTK *</label><input id="t_nip" placeholder="NIP PNS atau NUPTK atau NIK"></div>
+      <div><label>Nama Lengkap (beserta Gelar) *</label><input id="t_name" placeholder="mis. Hasan Basri, S.Pd."></div>
+      <div><label>Jenis Pegawai</label>
+        <select id="t_type">
+          <option value="Guru">Guru</option>
+          <option value="Tendik">Tenaga Kependidikan</option>
+        </select>
+      </div>
+      <div><label>Mata Pelajaran / Bagian Tugas *</label><input id="t_department" placeholder="mis. Matematika atau Tata Usaha"></div>
+      <div><label>Status Kepegawaian</label>
+        <select id="t_status">
+          <option value="PNS">PNS</option>
+          <option value="GTY">GTY (Guru Tetap Yayasan)</option>
+          <option value="Honorer">Honorer</option>
+        </select>
+      </div>
+      <div><label>Penugasan Wali Kelas (Kosongkan bila bukan wali kelas)</label>
+        <select id="t_homeroom_class">
+          <option value="">— Bukan Wali Kelas —</option>
+        </select>
+      </div>
+      <div><label>Pendidikan Terakhir</label><input id="t_education" placeholder="S1 Pendidikan Matematika"></div>
+      <div><label>Nomor HP / WhatsApp</label><input id="t_phone" placeholder="08xxxxxxxxxx"></div>
+      <div><label>Alamat Rumah</label><textarea id="t_address" rows="2"></textarea></div>
+
+      <div class="btns">
+        <button class="btn" onclick="App.closeModals()">Batal</button>
+        <button class="btn p" onclick="App.saveTeacher()">Simpan Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MODAL SURAT & DISPOSISI -->
+  <div class="modal" id="modalLetter">
+    <div class="box box-lg">
+      <h3 id="modalLetterTitle">Pencatatan Surat</h3>
+      <input type="hidden" id="l_id">
+
+      <div class="form-grid">
+        <div><label>Jenis Surat</label>
+          <select id="l_type" onchange="App.handleLetterTypeChange()">
+            <option value="masuk">Surat Masuk</option>
+            <option value="keluar">Surat Keluar</option>
+          </select>
+        </div>
+        <div><label>Nomor Surat *</label><input id="l_letter_number" placeholder="mis. 421.5/112/DISDIK/X/2026"></div>
+        <div><label>Tanggal Surat</label><input id="l_date" type="date"></div>
+        <div><label id="lblSenderReceiver">Asal Surat / Pengirim *</label><input id="l_sender_receiver" placeholder="mis. Dinas Pendidikan Provinsi Jatim"></div>
+        <div class="full"><label>Perihal Surat *</label><input id="l_subject" placeholder="Perihal atau inti isi surat"></div>
+        <div class="full"><label>Ringkasan Isi / Keterangan</label><textarea id="l_description" rows="2"></textarea></div>
+        <div><label>Status Penanganan</label>
+          <select id="l_status">
+            <option value="Baru">Baru</option>
+            <option value="Perlu Tindak Lanjut">Perlu Tindak Lanjut</option>
+            <option value="Diproses">Diproses</option>
+            <option value="Selesai">Selesai</option>
+          </select>
+        </div>
+        <div><label>Lampiran Berkas (PDF / Gambar)</label><input type="file" id="l_file" accept=".pdf,image/*"></div>
+      </div>
+
+      <!-- Bagian Disposisi Kepala Sekolah (Hanya untuk surat masuk) -->
+      <div id="dispositionSection" style="margin-top:20px;border-top:2px dashed var(--bd);padding-top:14px">
+        <h4>📋 Lembar Disposisi Kepala Sekolah</h4>
+        <div class="form-grid" style="margin-top:10px">
+          <div><label>Sifat Surat</label>
+            <select id="disp_nature">
+              <option value="Biasa">Biasa</option>
+              <option value="Penting">Penting</option>
+              <option value="Segera">Segera</option>
+              <option value="Rahasia">Rahasia</option>
+            </select>
+          </div>
+          <div><label>Batas Waktu Penyelesaian</label><input id="disp_deadline" type="date"></div>
+          
+          <div class="full">
+            <label>Diteruskan Kepada (Penerima Disposisi):</label>
+            <div id="dispToCheckboxList" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:4px">
+              <!-- Checkboxes generated dynamically -->
+            </div>
+          </div>
+
+          <div class="full">
+            <label>Instruksi / Arahan Disposisi:</label>
+            <div id="dispInstructionsCheckboxList" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:4px">
+              <!-- Checkboxes generated dynamically -->
+            </div>
+          </div>
+
+          <div class="full"><label>Catatan Khusus Kepala Sekolah</label><textarea id="disp_notes" rows="2" placeholder="Catatan arahan dari Kepala Sekolah"></textarea></div>
+        </div>
+      </div>
+
+      <div class="btns">
+        <button class="btn" onclick="App.closeModals()">Batal</button>
+        <button class="btn p" onclick="App.saveLetter()">Simpan Surat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MODAL ARSIP DOKUMEN -->
+  <div class="modal" id="modalArchive">
+    <div class="box">
+      <h3>Unggah Arsip Digital Dokumen</h3>
+      <div><label>Judul Dokumen *</label><input id="arc_title" placeholder="mis. SK Pembagian Tugas Guru 2026/2027"></div>
+      <div><label>Kategori Dokumen *</label>
+        <select id="arc_category">
+          <option value="SK / Keputusan">SK / Keputusan</option>
+          <option value="Surat Masuk">Surat Masuk</option>
+          <option value="Surat Keluar">Surat Keluar</option>
+          <option value="Data Siswa">Data Siswa</option>
+          <option value="Keuangan">Keuangan</option>
+          <option value="Akademik">Akademik</option>
+          <option value="Kerja Sama">Kerja Sama</option>
+          <option value="Inventaris">Inventaris</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+      </div>
+      <div><label>Tanggal Dokumen *</label><input id="arc_date" type="date"></div>
+      <div><label>Pilih File Dokumen (PDF, Gambar, Excel, Zip) *</label><input type="file" id="arc_file"></div>
+      <div><label>Keterangan Tambahan</label><textarea id="arc_description" rows="2"></textarea></div>
+
+      <div class="btns">
+        <button class="btn" onclick="App.closeModals()">Batal</button>
+        <button class="btn p" onclick="App.saveArchive()">Unggah &amp; Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MODAL CATATAN KESISWAAN -->
+  <div class="modal" id="modalRecord">
+    <div class="box">
+      <h3>Catatan Prestasi / Pelanggaran / Izin</h3>
+      <div><label>Pilih Siswa *</label><select id="rec_student_id"></select></div>
+      <div><label>Jenis Catatan *</label>
+        <select id="rec_type">
+          <option value="Prestasi">Prestasi (Juara / Penghargaan)</option>
+          <option value="Pelanggaran">Pelanggaran / Kedisiplinan</option>
+          <option value="Izin">Izin / Sakit</option>
+        </select>
+      </div>
+      <div><label>Tanggal *</label><input id="rec_date" type="date"></div>
+      <div><label>Judul Kegiatan / Kejadian *</label><input id="rec_title" placeholder="mis. Juara 2 Desain Poster Tingkat Kabupaten"></div>
+      <div><label>Poin (Opsional, misal -5 untuk pelanggaran atau +10)</label><input id="rec_point" type="number" value="0"></div>
+      <div><label>Keterangan / Tindak Lanjut</label><textarea id="rec_description" rows="2"></textarea></div>
+
+      <div class="btns">
+        <button class="btn" onclick="App.closeModals()">Batal</button>
+        <button class="btn p" onclick="App.saveKesiswaanRecord()">Simpan Catatan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. MODAL MUTASI MASUK -->
+  <div class="modal" id="modalMutasiMasuk">
+    <div class="box">
+      <h3>Pencatatan Siswa Mutasi Masuk (Pindahan)</h3>
+      <div class="form-grid">
+        <div><label>Tanggal Masuk *</label><input id="mm_date" type="date"></div>
+        <div><label>Nomor Surat Pindah</label><input id="mm_letter_number" placeholder="mis. 421/SMP-01/VII/2026"></div>
+        <div class="full"><label>Sekolah Asal *</label><input id="mm_school_origin" placeholder="Nama sekolah asal siswa"></div>
+        <div class="full"><label>Alasan Pindah</label><input id="mm_reason" placeholder="mis. Mengikuti kepindahan domisili orang tua"></div>
+        <div><label>NIS Baru di SMK *</label><input id="mm_nis" placeholder="mis. 2026150"></div>
+        <div><label>NISN</label><input id="mm_nisn"></div>
+        <div class="full"><label>Nama Lengkap Siswa *</label><input id="mm_name"></div>
+        <div><label>Jenis Kelamin</label>
+          <select id="mm_gender">
+            <option value="L">Laki-laki</option>
+            <option value="P">Perempuan</option>
+          </select>
+        </div>
+        <div><label>Kelas yang Ditempati *</label><select id="mm_class_name"></select></div>
+      </div>
+      <div class="btns">
+        <button class="btn" onclick="App.closeModals()">Batal</button>
+        <button class="btn p" onclick="App.saveMutationMasuk()">Simpan &amp; Aktifkan Siswa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. MODAL MUTASI KELUAR -->
+  <div class="modal" id="modalMutasiKeluar">
+    <div class="box">
+      <h3>Pencatatan Siswa Mutasi Keluar</h3>
+      <p class="sub" style="margin-bottom:12px">Siswa yang dimutasi keluar otomatis statusnya menjadi Pindah/Keluar, tidak lagi dihitung di total siswa aktif, dan otomatis tercatat di Buku Induk.</p>
+      <div><label>Pilih Siswa yang Keluar *</label><select id="mk_student_id"></select></div>
+      <div><label>Jenis Mutasi Keluar</label>
+        <select id="mk_sub_type">
+          <option value="Pindah ke sekolah lain">Pindah ke sekolah lain</option>
+          <option value="Mengundurkan diri">Mengundurkan diri</option>
+          <option value="Dikeluarkan">Dikeluarkan</option>
+          <option value="Meninggal dunia">Meninggal dunia</option>
+        </select>
+      </div>
+      <div><label>Tanggal Efektif Keluar *</label><input id="mk_date" type="date"></div>
+      <div><label>Sekolah Tujuan (Jika Pindah)</label><input id="mk_destination" placeholder="mis. SMK Negeri 2 Jember"></div>
+      <div><label>Alasan / Keterangan</label><input id="mk_reason" placeholder="mis. Ikut orang tua pindah dinas"></div>
+      <div><label>Nomor Surat Keterangan Pindah</label><input id="mk_letter_number" placeholder="mis. 421.3/089/SMK-BH/2026"></div>
+
+      <div class="btns">
+        <button class="btn" onclick="App.closeModals()">Batal</button>
+        <button class="btn d" onclick="App.saveMutationKeluar()">Proses Mutasi Keluar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. MODAL INVENTARIS -->
+  <div class="modal" id="modalInventory">
+    <div class="box">
+      <h3 id="modalInvTitle">Tambah Barang Inventaris</h3>
+      <input type="hidden" id="inv_id">
+      <div><label>Kode Barang (Opsional, otomatis bila kosong)</label><input id="inv_code" placeholder="mis. INV-001"></div>
+      <div><label>Nama Barang *</label><input id="inv_name" placeholder="mis. PC Desktop Lab Komputer"></div>
+      <div><label>Kategori *</label>
+        <select id="inv_category">
+          <option value="Elektronik">Elektronik</option>
+          <option value="Furnitur">Furnitur</option>
+          <option value="Alat Praktik">Alat Praktik</option>
+          <option value="Buku">Buku</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+      </div>
+      <div><label>Lokasi Penempatan *</label><input id="inv_location" placeholder="mis. Lab DKV, Ruang Guru, dsb."></div>
+      <div><label>Jumlah Unit *</label><input id="inv_quantity" type="number" min="1" value="1"></div>
+      <div><label>Kondisi Barang *</label>
+        <select id="inv_condition">
+          <option value="Baik">Baik</option>
+          <option value="Rusak Ringan">Rusak Ringan</option>
+          <option value="Rusak Berat">Rusak Berat</option>
+        </select>
+      </div>
+      <div><label>Tanggal Pengadaan</label><input id="inv_purchase_date" type="date"></div>
+      <div><label>Catatan Tambahan</label><textarea id="inv_notes" rows="2"></textarea></div>
+
+      <div class="btns">
+        <button class="btn" onclick="App.closeModals()">Batal</button>
+        <button class="btn p" onclick="App.saveInventory()">Simpan Barang</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. MODAL PENGGUNA (ADMIN) -->
+  <div class="modal" id="modalUser">
+    <div class="box">
+      <h3 id="modalUserTitle">Tambah Pengguna Baru</h3>
+      <input type="hidden" id="u_id">
+      <div><label>Nama Lengkap *</label><input id="u_name" placeholder="Nama staf / guru"></div>
+      <div><label>Username *</label><input id="u_username" placeholder="mis. staf.tu"></div>
+      <div id="uPasswordWrapper"><label>Kata Sandi (Minimal 6 Karakter) *</label><input id="u_password" type="password"></div>
+      <div><label>Peran (Role)</label>
+        <select id="u_role">
+          <option value="Staf TU">Staf TU</option>
+          <option value="Admin TU">Admin TU</option>
+          <option value="Kepala Sekolah">Kepala Sekolah</option>
+          <option value="Guru">Guru</option>
+        </select>
+      </div>
+      <div><label>Status Akun</label>
+        <select id="u_is_active">
+          <option value="1">Aktif</option>
+          <option value="0">Nonaktif</option>
+        </select>
+      </div>
+
+      <div class="btns">
+        <button class="btn" onclick="App.closeModals()">Batal</button>
+        <button class="btn p" onclick="App.saveUser()">Simpan Pengguna</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. MODAL UBAH KATA SANDI PENGGUNA -->
+  <div class="modal" id="modalResetPassword">
+    <div class="box">
+      <h3>Atur Ulang Kata Sandi</h3>
+      <input type="hidden" id="reset_user_id">
+      <p class="sub" id="resetUserPrompt">Masukkan kata sandi baru untuk pengguna ini (minimal 6 karakter):</p>
+      <div style="margin-top:10px"><label>Kata Sandi Baru *</label><input id="reset_password_val" type="password"></div>
+      <div class="btns">
+        <button class="btn" onclick="App.closeModals()">Batal</button>
+        <button class="btn p" onclick="App.submitResetPassword()">Simpan Sandi Baru</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. MODAL INFORMASI AKSES JARINGAN HP (LAN / WI-FI) -->
+  <div class="modal" id="modalLanInfo">
+    <div class="box">
+      <h3>📶 Akses Jaringan Lokal (Komputer &amp; HP)</h3>
+      <p class="sub" style="margin:8px 0 14px">Komputer ini bertindak sebagai <b>Server Kantor TU</b>. Staf dapat membuka aplikasi dari HP atau laptop tanpa internet publik, asalkan terhubung ke <b>Wi-Fi / LAN yang sama</b>.</p>
+
+      <div style="background:var(--gl);padding:14px;border-radius:10px;margin-bottom:14px">
+        <small style="color:var(--g1);font-weight:700">ALAMAT DI BROWSER HP ANDA:</small>
+        <div id="lanUrlDisplay" style="font-size:16px;font-weight:800;color:var(--g1);margin-top:4px;word-break:break-all">http://...</div>
+      </div>
+
+      <div id="lanInterfacesList" style="font-size:12.5px;color:var(--mut);margin-bottom:14px"></div>
+
+      <div class="btns">
+        <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('lanUrlDisplay').textContent); App.toast('Tautan disalin ke papan klip!')">📋 Salin Tautan</button>
+        <button class="btn p" onclick="App.closeModals()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12. MODAL CETAK UNIVERSAL (BUKU INDUK, DISPOSISI, LEGER, DLL) -->
+  <div class="modal" id="mb">
+    <div class="box box-lg">
+      <div id="mbc" class="paper">
+        <!-- Rendered HTML for Print -->
+      </div>
+      <div class="btns" style="margin-top:20px">
+        <button class="btn" onclick="document.getElementById('mb').classList.remove('on')">Tutup</button>
+        <button class="btn p" id="mbp" onclick="window.print()">🖨️ Cetak Dokumen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13. LOGIN OVERLAY (MODAL MASUK SISTEM) -->
+  <div class="modal on" id="loginModal" style="display:none">
+    <div class="box" style="max-width:380px">
+      <div style="text-align:center;font-size:36px;margin-bottom:6px">🏫</div>
+      <h3 style="text-align:center;margin-bottom:2px" id="loginSchoolTitle">SMK BAITUL HIKMAH</h3>
+      <p class="sub" style="text-align:center;margin-bottom:18px">Sistem Administrasi Tata Usaha</p>
+
+      <div id="loginError" style="color:var(--rd);font-size:13px;margin-bottom:10px;display:none"></div>
+
+      <div><label>Nama Pengguna (Username)</label><input id="loginUsername" placeholder="admin.tu atau staf.tu" autofocus autocomplete="username"></div>
+      <div><label>Kata Sandi</label><input id="loginPassword" type="password" placeholder="Kata sandi" autocomplete="current-password"></div>
+
+      <button class="btn p" id="btnLoginSubmit" onclick="App.handleLogin()" style="width:100%;margin-top:18px;padding:10px">Masuk ke Sistem</button>
+
+      <div style="margin-top:14px;background:var(--bg);padding:10px;border-radius:8px;font-size:12px;color:var(--mut)">
+        <b>Info Akun Bawaan:</b><br>
+        Username: <code>admin.tu</code> &bull; Sandi: <code>admin123</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast">Notifikasi</div>
+
+  <!-- JAVASCRIPT APPLICATION -->
+  <script src="/js/app.js"></script>
+</body>
+</html>
+
